@@ -1,0 +1,12 @@
+{
+  "name": "roblox-trading-hub",
+  "version": "1.0.0",
+  "description": "Trading hub service",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx servor . index.html 8080 --reload"
+  },
+  "dependencies": {
+    "servor": "^4.0.2"
+  }
+}
