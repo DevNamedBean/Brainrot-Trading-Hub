@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Trading Hub Pro</title>
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #0b0f19;
+            --bg-card: #111827;
+            --bg-input: #1f2937;
+            --border-color: #374151;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --error: #ef4444;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-sans); background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 24px; }
+        .container { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5); width: 100%; max-width: 480px; padding: 40px; }
+        h1 { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 8px; letter-spacing: -0.025em; }
+        h2 { font-size: 20px; font-weight: 600; text-align: center; margin-bottom: 24px; }
+        .subtitle { font-size: 14px; color: var(--text-muted); text-align: center; margin-bottom: 32px; line-height: 1.5; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .btn-stack { display: flex; flex-direction: column; gap: 12px; }
+        .btn-group { display: flex; gap: 12px; margin-top: 24px; }
+        button { width: 100%; background-color: var(--primary); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s ease; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        button:hover { background-color: var(--primary-hover); }
+        button:active { transform: scale(0.98); }
+        .btn-secondary { background-color: transparent; border: 1px solid var(--border-color); color: var(--text-main); }
+        .btn-secondary:hover { background-color: var(--bg-input); }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; }
+        input[type="text"], input[type="url"], input[type="file"] { width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); background-color: var(--bg-input); color: white; border-radius: 8px; font-size: 14px; outline: none; }
+        input[type="text"]:focus, input[type="url"]:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        input[type="file"]::file-selector-button { background: var(--border-color); border: none; color: white; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 12px; }
+        
+        .code-box-wrapper { display: flex; gap: 10px; align-items: center; margin: 8px 0 20px 0; }
+        .code-container { flex: 1; background-color: rgba(16, 185, 129, 0.05); border: 1px dashed var(--success); padding: 16px; text-align: center; font-size: 26px; font-family: monospace; letter-spacing: 4px; font-weight: 700; color: var(--success); border-radius: 8px; }
+        .btn-copy { width: auto; background-color: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); padding: 16px; height: 62px; }
+        .btn-copy:hover { background-color: var(--border-color); }
+        
+        .error-message { color: var(--error); font-size: 13px; margin-top: 6px; display: none; font-weight: 500; }
+        .info-box { background: rgba(59, 130, 246, 0.1); border: 1px solid var(--primary); padding: 12px; border-radius: 8px; font-size: 12px; color: #93c5fd; margin-bottom: 15px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- SCREEN 1: MAIN NAVIGATION -->
+    <div id="screen-menu" class="screen active">
+        <h1>Trading Hub</h1>
+        <p class="subtitle">Configure your custom receiver endpoint or securely enter a room to propose a trade.</p>
+        <div class="btn-stack">
+            <button onclick="showScreen('screen-setup')">Setup Endpoint</button>
+            <button class="btn-secondary" onclick="showScreen('screen-enter-code')">Enter Trading Room</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: SETUP -->
+    <div id="screen-setup" class="screen">
+        <h2>Webhook Configuration</h2>
+        <div class="form-group">
+            <label for="setup-webhook">Discord Webhook URL</label>
+            <input type="url" id="setup-webhook" placeholder="https://discord.com...">
+        </div>
+        <div class="form-group">
+            <label>Your Unique Trading Code (Auto-Generated)</label>
+            <div class="code-box-wrapper">
+                <div id="generated-code" class="code-container">----</div>
+                <button type="button" class="btn-copy" onclick="copyGeneratedCode()" title="Copy Code">📋</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="setup-name">Webhook Identity Name</label>
+            <input type="text" id="setup-name" placeholder="e.g., Nexus Trading Bot">
+        </div>
+        <div class="form-group">
+            <label for="setup-avatar">Identity Profile Picture</label>
+            <input type="file" id="setup-avatar" accept="image/*">
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn-secondary" onclick="showScreen('screen-menu')">Back</button>
+            <button type="button" onclick="saveSetup()">Initialize & Save</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 3: ENTER CODE -->
+    <div id="screen-enter-code" class="screen">
+        <h2>Authentication</h2>
+        <div class="info-box">Voor testen kun je ook gebruiken: TR-TEST1, TR-TEST2 of TR-TEST3</div>
+        <div class="form-group">
+            <label for="input-trade-code">Enter Active Trading Code</label>
+            <input type="text" id="input-trade-code" placeholder="e.g., TR-8A2F">
+            <div id="code-error" class="error-message">Invalid access code. Please verify and try again.</div>
+        </div>
+        <div class="btn-group">
+            <button type="button" class="btn-secondary" onclick="showScreen('screen-menu')">Back</button>
+            <button type="button" onclick="validateCode()">Verify Code</button>
+        </div>
+    </div>
+
+    <!-- SCREEN 4: TRADING FORM -->
+    <div id="screen-form" class="screen">
+        <h2>Trading Form</h2>
+        <p class="subtitle" style="margin-bottom: 20px;">Please supply the required deal parameters below.</p>
+        
+        <div class="form-group">
+            <label for="form-trading">What brainrot are you trading?</label>
+            <input type="text" id="form-trading" placeholder="Your offer">
+        </div>
+        <div class="form-group">
+            <label for="form-roblox">What is your Roblox username?</label>
+            <input type="text" id="form-roblox" placeholder="Roblox account name">
+        </div>
+        <div class="form-group">
+            <label for="form-discord">What is your Discord username?</label>
+            <input type="text" id="form-discord" placeholder="username or user#0000">
+        </div>
+        <div class="form-group">
+            <label for="form-looking">What brainrots are you looking for?</label>
+            <input type="text" id="form-looking" placeholder="Your demands">
+        </div>
+        <div class="form-group">
+            <label for="form-base-img">Can you send a picture of your base?</label>
+            <input type="file" id="form-base-img" accept="image/*">
+        </div>
+        
+        <div class="btn-group">
+            <button type="button" class="btn-secondary" onclick="showScreen('screen-enter-code')">Cancel</button>
+            <button type="button" onclick="submitTradingForm()">Submit Offer</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let activeWebhookConfig = null;
+
+    // VASTE CODES VOOR DIRECT TESTEN (Verander hier eventueel "JOUW_WEBHOOK_HIER" naar een echte URL)
+    const hardcodedCodes = {
+        "TR-TEST1": { webhookUrl: "JOUW_WEBHOOK_HIER", username: "Test Room 1" },
+        "TR-TEST2": { webhookUrl: "JOUW_WEBHOOK_HIER", username: "Test Room 2" },
+        "TR-TEST3": { webhookUrl: "JOUW_WEBHOOK_HIER", username: "Test Room 3" }
+    };
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        if (screenId === 'screen-setup') { generateUniqueCode(); }
+    }
+
+    function generateUniqueCode() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        let code = 'TR-';
+        for (let i = 0; i < 4; i++) { code += chars.charAt(Math.floor(Math.random() * chars.length)); }
+        document.getElementById('generated-code').innerText = code;
+    }
+
+    function copyGeneratedCode() {
+        const codeText = document.getElementById('generated-code').innerText;
+        if (codeText === "----") return;
+        navigator.clipboard.writeText(codeText).then(() => {
+            alert(`Code ${codeText} copied to clipboard!`);
+        }).catch(err => {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    function saveSetup() {
+        const webhookUrl = document.getElementById('setup-webhook').value;
+        const code = document.getElementById('generated-code').innerText;
+        const name = document.getElementById('setup-name').value;
